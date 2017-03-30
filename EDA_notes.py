@@ -31,6 +31,9 @@ dF = pd.read_csv(file_name, header=None)
 # head of data
 df.head()
 
+# data sample
+df.sample(10)
+
 # num of entries, type of each column
 df.info()
 
@@ -51,6 +54,15 @@ sns.heatmap(correlation, vmax=1, square=True,annot=True,cmap='cubehelix')
 
 # unique value in a column
 df['COL1'].unique()
+
+column_list = df.columns
+# check null value status
+df.isnull().sum()
+# fillna data with column mean
+df['COL1'] = df.COL1.fillna(df.COL1.mean())
+# categorize column
+df['COL1'] = df['COL1'].map({'VALUE1' : 1, 'VALUE2' : 0}).astype(int)
+
 
 # group data and check statistics
 print(df[['COL1', 'COL2']].groupby(['COL1'], as_index=False).mean().sort_values(by='COL2', ascending=False))
@@ -82,10 +94,15 @@ df['COL1'] = pd.to_numeric(df['COL1'], errors='coerce')
 # reset index
 df = df.reset_index()['COL1']
 
-# fillna data with column mean
-df['COL1'] = df.COL1.fillna(df.COL1.mean())
-# categorize column
-df['COL1'] = df['COL1'].map({'VALUE1' : 1, 'VALUE2' : 0}).astype(int)
+# remove outliers
+#### Removing the outliers
+df = df[(df.COL1 <= VALUE1) & (df.COL2 >= VALUE2)]
+
+# change date column format
+df["Date"] = pd.to_datetime(df["Date"])
+
+# pivot table summary
+print(df.pivot_table(index = "COL1", values = "COL2", aggfunc=len))
 
 ##############################################################
 ######################### plots ##############################
@@ -94,6 +111,7 @@ df['COL1'] = df['COL1'].map({'VALUE1' : 1, 'VALUE2' : 0}).astype(int)
 # bar plots
 df['COL1'].value_counts().plot(kind='bar')
 df.COL1.value_counts().head(20).plot(kind = 'bar')
+g = sns.countplot(df['COL1'])
 # horizontal bar plot
 plt.barh(y, CATEGORY, align='center', alpha=0.8)
 
@@ -119,8 +137,8 @@ plt.xlim([LOW,HIGH])
 plt.xlabel('X-AXIS LABEL')
 plt.legend('VALUE1,'VALUE2')
 plt.title('TITLE_TITLE_TITLE')
+rotg = g.set_xticklabels(g.get_xticklabels(), rotation=90)
 
-plt.show()
 
 ##############################################################
 ################## ML fit and predict ########################
